@@ -16,8 +16,8 @@ DAILY_FILE_FORMAT = "%Y-%m-%d-daily.md"
 
 # Command to Markdown section mapping
 SECTIONS = {
-    "did": "## ✅ Yesterday",
-    "plan": "## ▶️ Today",
+    "did": "## ✅ Done",
+    "plan": "## ▶️ To Do",
     "block": "## 🚧 Blockers",
     "meeting": "## 🗓 Meetings",
     "notes": "## 🧠 Quick Notes",

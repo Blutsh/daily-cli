@@ -1,6 +1,5 @@
 """Business logic for daily."""
 
-import re
 from datetime import datetime
 from pathlib import Path
 
@@ -247,25 +246,10 @@ def generate_cheat_data(
         if filter_tags:
             bullets = filter_bullets_by_tags(bullets, filter_tags)
 
-        # Clean bullets (remove tags)
-        clean_bullets = [_remove_tags_from_bullet(b) for b in bullets]
-
         result.append({
             "title": title,
             "key": section_key,
-            "bullets": clean_bullets,
+            "bullets": bullets,
         })
 
     return result
-
-
-def _remove_tags_from_bullet(bullet: str) -> str:
-    """Remove tags from a bullet for clean output.
-
-    Args:
-        bullet: Bullet text with possible tags.
-
-    Returns:
-        Text without the tags part.
-    """
-    return re.sub(r"\s*#tags:\s*\S+$", "", bullet).strip()

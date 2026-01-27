@@ -21,9 +21,9 @@ type: daily
 date: {date_str}
 ---
 
-## ✅ Yesterday
+## ✅ Done
 
-## ▶️ Today
+## ▶️ To Do
 
 ## 🚧 Blockers
 

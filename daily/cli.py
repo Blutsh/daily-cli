@@ -148,6 +148,19 @@ def cheat(
         raise typer.Exit(1)
 
 
+def _format_bullet_with_tags(bullet: str) -> str:
+    """Format bullet with styled tags for rich output."""
+    import re
+    match = re.search(r"#tags:\s*(.+)$", bullet)
+    if not match:
+        return bullet
+
+    text = bullet[:match.start()].strip()
+    tags = [t.strip() for t in match.group(1).split(",")]
+    styled_tags = " ".join(f"[cyan]#{t}[/cyan]" for t in tags)
+    return f"{text}  {styled_tags}"
+
+
 def _print_cheat_plain(data: list[dict]) -> None:
     """Print cheat sheet in plain text."""
     for section in data:
@@ -186,7 +199,8 @@ def _print_cheat_rich(data: list[dict], date=None) -> None:
 
         if section["bullets"]:
             for bullet in section["bullets"]:
-                console.print(f"   • {bullet}")
+                formatted = _format_bullet_with_tags(bullet)
+                console.print(f"   • {formatted}")
         else:
             console.print("   [dim](no entries)[/dim]")
 
