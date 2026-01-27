@@ -1,0 +1,14 @@
+# daily configuration example
+# Copy this file to ~/.daily/config.toml
+
+# Directory where daily notes are stored
+# You can use ~ for user's home directory
+# Default: ~/.daily/dailies
+dailies_dir = "~/.daily/dailies"
+
+# Alternative: use a custom path
+# dailies_dir = "~/Documents/dailies"
+# dailies_dir = "/home/user/Obsidian/dailies"
+
+# You can also set DAILY_DIR environment variable
+# which takes priority over this config file
