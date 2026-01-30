@@ -71,6 +71,20 @@ def get_dailies_dir() -> Path:
     return dailies_dir
 
 
+def get_skip_weekends() -> bool:
+    """Get skip_weekends setting.
+
+    Priority:
+    1. Config file (~/.daily/config.toml)
+    2. Default: True
+
+    Returns:
+        True if weekends should be skipped, False otherwise.
+    """
+    config = load_config_file()
+    return config.get("skip_weekends", True)
+
+
 def create_default_config() -> None:
     """Create config file with default values."""
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)

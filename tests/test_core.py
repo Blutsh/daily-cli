@@ -10,6 +10,7 @@ from daily.core import (
     get_bullets_from_section,
     get_daily_file_path,
     get_filtered_bullets,
+    get_previous_workday,
     insert_bullet,
     read_daily_file,
     write_daily_file,
@@ -23,6 +24,65 @@ def temp_dailies_dir(tmp_path, monkeypatch):
     dailies_dir.mkdir()
     monkeypatch.setenv("DAILY_DIR", str(dailies_dir))
     return dailies_dir
+
+
+class TestGetPreviousWorkday:
+    """Tests for get_previous_workday."""
+
+    def test_monday_returns_friday(self):
+        """Monday returns previous Friday."""
+        monday = datetime(2026, 2, 2)  # Monday
+        result = get_previous_workday(monday)
+        assert result.weekday() == 4  # Friday
+        assert result.day == 30  # Jan 30
+
+    def test_tuesday_returns_monday(self):
+        """Tuesday returns Monday."""
+        tuesday = datetime(2026, 2, 3)
+        result = get_previous_workday(tuesday)
+        assert result.weekday() == 0  # Monday
+        assert result.day == 2
+
+    def test_wednesday_returns_tuesday(self):
+        """Wednesday returns Tuesday."""
+        wednesday = datetime(2026, 2, 4)
+        result = get_previous_workday(wednesday)
+        assert result.weekday() == 1  # Tuesday
+        assert result.day == 3
+
+    def test_sunday_returns_friday(self):
+        """Sunday returns Friday."""
+        sunday = datetime(2026, 2, 1)
+        result = get_previous_workday(sunday)
+        assert result.weekday() == 4  # Friday
+        assert result.day == 30
+
+    def test_saturday_returns_friday(self):
+        """Saturday returns Friday."""
+        saturday = datetime(2026, 1, 31)
+        result = get_previous_workday(saturday)
+        assert result.weekday() == 4  # Friday
+        assert result.day == 30
+
+    def test_no_date_uses_today(self):
+        """Uses current date when no date provided."""
+        result = get_previous_workday()
+        # Should return a datetime before today
+        assert result < datetime.now()
+
+    def test_skip_weekends_false_monday_returns_sunday(self):
+        """When skip_weekends=False, Monday returns Sunday."""
+        monday = datetime(2026, 2, 2)  # Monday
+        result = get_previous_workday(monday, skip_weekends=False)
+        assert result.weekday() == 6  # Sunday
+        assert result.day == 1
+
+    def test_skip_weekends_false_always_returns_yesterday(self):
+        """When skip_weekends=False, always returns literal yesterday."""
+        saturday = datetime(2026, 1, 31)  # Saturday
+        result = get_previous_workday(saturday, skip_weekends=False)
+        assert result.weekday() == 4  # Friday (literal yesterday)
+        assert result.day == 30
 
 
 class TestGetDailyFilePath:

@@ -63,8 +63,8 @@ daily cheat
 
 | Command | Description | Section |
 |---------|-------------|---------|
-| `daily did "text"` | Log completed work | Yesterday |
-| `daily plan "text"` | Plan work for today | Today |
+| `daily did "text"` | Log completed work | Done |
+| `daily plan "text"` | Plan work for today | To Do |
 | `daily block "text"` | Log a blocker | Blockers |
 | `daily meeting "text"` | Log a meeting | Meetings |
 | `daily cheat` | Show standup cheat sheet | - |
@@ -81,7 +81,7 @@ daily did "Code review" -t review
 The `daily cheat` command generates a clean summary for standups:
 
 ```
-YESTERDAY
+DONE
 - Fixed CI/CD pipeline
 - Deployed new feature
 
@@ -89,7 +89,7 @@ MEETINGS
 - Sprint planning
 - 1:1 with manager
 
-TODAY
+TO DO
 - Review pending PRs
 - Write documentation
 
@@ -97,10 +97,41 @@ BLOCKERS
 - Waiting for AWS access
 ```
 
-Filter by tags:
+### Options
 
 ```bash
+# Filter by tags
 daily cheat --tags aws
+
+# Show today's file instead of yesterday's
+daily cheat --today
+
+# Plain text output (no colors)
+daily cheat --plain
+```
+
+### Weekend Logic
+
+By default, `daily cheat` skips weekends when looking for "yesterday's" file:
+
+- On **Monday**, it shows **Friday's** entries
+- On **Saturday** or **Sunday**, it shows **Friday's** entries
+
+This matches typical standup workflows where you report on the last workday.
+
+```bash
+# Override: always skip weekends
+daily cheat --workdays
+
+# Override: use literal yesterday (even if weekend)
+daily cheat --no-workdays
+```
+
+Configure the default in `~/.daily/config.toml`:
+
+```toml
+# Set to false to always use literal yesterday
+skip_weekends = true
 ```
 
 ## File Structure
@@ -113,10 +144,10 @@ type: daily
 date: 2026-01-27
 ---
 
-## ✅ Yesterday
+## ✅ Done
 - Fixed CI/CD pipeline #tags: cicd,infra
 
-## ▶️ Today
+## ▶️ To Do
 - Review pending PRs
 
 ## 🚧 Blockers
@@ -130,18 +161,22 @@ date: 2026-01-27
 
 ## Configuration
 
+Create `~/.daily/config.toml` to customize behavior:
+
+```toml
+# Directory where daily notes are stored
+dailies_dir = "~/.daily/dailies"
+
+# Skip weekends in daily cheat (Monday shows Friday)
+skip_weekends = true
+```
+
 ### Custom directory
 
-Set `DAILY_DIR` environment variable:
+Set `DAILY_DIR` environment variable (takes priority over config file):
 
 ```bash
 export DAILY_DIR=/path/to/my/dailies
-```
-
-Or create `~/.daily/config.toml`:
-
-```toml
-dailies_dir = "/path/to/my/dailies"
 ```
 
 Priority: Environment variable > Config file > Default (`~/.daily/dailies`)
@@ -184,6 +219,9 @@ A: Absolutely. The files are designed to be Git-friendly.
 
 **Q: What if I forget to log something?**
 A: You can edit the Markdown file directly, or use the API with a specific date.
+
+**Q: Why does `daily cheat` show Friday's entries on Monday?**
+A: By default, weekends are skipped so Monday's standup shows Friday's work. Use `--no-workdays` to show literal yesterday, or set `skip_weekends = false` in config.
 
 ## License
 

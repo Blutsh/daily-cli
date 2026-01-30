@@ -121,17 +121,26 @@ def cheat(
     tags: str = typer.Option(None, "--tags", "-t", help="Filter by tags"),
     plain: bool = typer.Option(False, "--plain", "-p", help="Plain text output (no colors)"),
     today: bool = typer.Option(False, "--today", help="Show today's file instead of yesterday's"),
+    workdays: bool | None = typer.Option(
+        None,
+        "--workdays/--no-workdays",
+        help="Skip weekends when looking for yesterday's file (default: from config)",
+    ),
 ) -> None:
     """Show cheat sheet for daily standup (reads yesterday's entries by default)."""
-    from datetime import datetime, timedelta
+    from daily.config import get_skip_weekends
+    from daily.core import get_previous_workday
 
     tag_list = parse_tags(tags)
+
+    # Determine skip_weekends behavior
+    skip_weekends = workdays if workdays is not None else get_skip_weekends()
 
     # By default, read yesterday's file (what you logged yesterday for today's standup)
     if today:
         target_date = None  # Today
     else:
-        target_date = datetime.now() - timedelta(days=1)  # Yesterday
+        target_date = get_previous_workday(skip_weekends=skip_weekends)
 
     try:
         data = generate_cheat_data(filter_tags=tag_list, date=target_date)

@@ -12,3 +12,8 @@ dailies_dir = "~/.daily/dailies"
 
 # You can also set DAILY_DIR environment variable
 # which takes priority over this config file
+
+# Skip weekends when showing yesterday's entries
+# If true, Monday shows Friday's entries
+# Default: true
+skip_weekends = true

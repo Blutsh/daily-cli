@@ -350,3 +350,117 @@ class TestCheatCommand:
         assert "standup" in result.output.lower()
         assert "--tags" in result.output
         assert "--today" in result.output
+        assert "--workdays" in result.output
+
+
+class TestCheatWeekendLogic:
+    """Tests for the cheat command weekend logic."""
+
+    def test_cheat_skips_weekends_by_default(self, temp_dailies_dir, monkeypatch):
+        """On Monday, cheat shows Friday's file when skip_weekends=true."""
+        from datetime import datetime
+        from unittest.mock import patch
+        from daily.core import insert_bullet
+
+        # Create Friday's file
+        friday = datetime(2026, 1, 30)  # Friday
+        insert_bullet("did", "Friday work", date=friday)
+
+        # Mock datetime.now() to be Monday
+        monday = datetime(2026, 2, 2)
+
+        # Ensure config returns True for skip_weekends
+        monkeypatch.setattr("daily.config.CONFIG_FILE", temp_dailies_dir / "nonexistent.toml")
+
+        with patch("daily.core.datetime") as mock_dt:
+            mock_dt.now.return_value = monday
+            # timedelta still needs to work
+            from datetime import timedelta
+            mock_dt.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
+
+            result = runner.invoke(app, ["cheat"])
+
+        assert result.exit_code == 0
+        assert "Friday work" in result.output
+
+    def test_cheat_no_workdays_shows_literal_yesterday(self, temp_dailies_dir, monkeypatch):
+        """--no-workdays shows literal yesterday even on Monday."""
+        from datetime import datetime
+        from unittest.mock import patch
+        from daily.core import insert_bullet
+
+        # Create Sunday's file (literal yesterday from Monday)
+        sunday = datetime(2026, 2, 1)  # Sunday
+        insert_bullet("did", "Sunday work", date=sunday)
+
+        # Mock datetime.now() to be Monday
+        monday = datetime(2026, 2, 2)
+
+        with patch("daily.core.datetime") as mock_dt:
+            mock_dt.now.return_value = monday
+            mock_dt.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
+
+            result = runner.invoke(app, ["cheat", "--no-workdays"])
+
+        assert result.exit_code == 0
+        assert "Sunday work" in result.output
+
+    def test_cheat_workdays_flag_overrides_config(self, temp_dailies_dir, monkeypatch):
+        """--workdays flag overrides config setting."""
+        from datetime import datetime
+        from unittest.mock import patch
+        from daily.core import insert_bullet
+
+        # Create Friday's file
+        friday = datetime(2026, 1, 30)  # Friday
+        insert_bullet("did", "Friday work", date=friday)
+
+        # Create Sunday's file
+        sunday = datetime(2026, 2, 1)  # Sunday
+        insert_bullet("did", "Sunday work", date=sunday)
+
+        # Mock datetime.now() to be Monday
+        monday = datetime(2026, 2, 2)
+
+        # Set config to skip_weekends=false
+        config_file = temp_dailies_dir / "config.toml"
+        config_file.write_text("skip_weekends = false")
+        monkeypatch.setattr("daily.config.CONFIG_FILE", config_file)
+
+        with patch("daily.core.datetime") as mock_dt:
+            mock_dt.now.return_value = monday
+            mock_dt.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
+
+            # But use --workdays flag to override
+            result = runner.invoke(app, ["cheat", "--workdays"])
+
+        assert result.exit_code == 0
+        assert "Friday work" in result.output
+        assert "Sunday work" not in result.output
+
+    def test_cheat_respects_config_skip_weekends_false(self, temp_dailies_dir, monkeypatch):
+        """Respects config skip_weekends=false."""
+        from datetime import datetime
+        from unittest.mock import patch
+        from daily.core import insert_bullet
+
+        # Create Sunday's file
+        sunday = datetime(2026, 2, 1)  # Sunday
+        insert_bullet("did", "Sunday work", date=sunday)
+
+        # Mock datetime.now() to be Monday
+        monday = datetime(2026, 2, 2)
+
+        # Set config to skip_weekends=false
+        config_file = temp_dailies_dir / "config.toml"
+        config_file.write_text("skip_weekends = false")
+        monkeypatch.setattr("daily.config.CONFIG_FILE", config_file)
+
+        with patch("daily.core.datetime") as mock_dt:
+            mock_dt.now.return_value = monday
+            mock_dt.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
+
+            result = runner.invoke(app, ["cheat"])
+
+        assert result.exit_code == 0
+        assert "Sunday work" in result.output

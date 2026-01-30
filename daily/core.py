@@ -1,6 +1,6 @@
 """Business logic for daily."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from daily.config import DAILY_FILE_FORMAT, SECTIONS, get_dailies_dir
@@ -11,6 +11,38 @@ from daily.markdown import (
     format_bullet_with_tags,
     insert_at_section,
 )
+
+
+def get_previous_workday(date: datetime | None = None, skip_weekends: bool = True) -> datetime:
+    """Get the previous day, optionally skipping weekends.
+
+    When skip_weekends is True:
+    - If date is Monday, returns Friday.
+    - If date is Sunday, returns Friday.
+    - If date is Saturday, returns Friday.
+    - Otherwise returns yesterday.
+
+    When skip_weekends is False:
+    - Always returns the literal previous day.
+
+    Args:
+        date: Reference date. If None, uses current date.
+        skip_weekends: If True, skip Saturday and Sunday. Default True.
+
+    Returns:
+        The previous day (or workday if skip_weekends=True) as a datetime.
+    """
+    if date is None:
+        date = datetime.now()
+
+    previous = date - timedelta(days=1)
+
+    if skip_weekends:
+        # weekday(): Monday=0, Sunday=6
+        while previous.weekday() >= 5:  # Saturday or Sunday
+            previous -= timedelta(days=1)
+
+    return previous
 
 
 def get_daily_file_path(date: datetime | None = None) -> Path:

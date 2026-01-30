@@ -11,6 +11,7 @@ from daily.config import (
     TAG_FORMAT,
     create_default_config,
     get_dailies_dir,
+    get_skip_weekends,
     load_config_file,
 )
 
@@ -165,6 +166,36 @@ class TestGetDailiesDir:
         result = get_dailies_dir()
         assert "~" not in str(result)
         assert "my_dailies" in str(result)
+
+
+class TestGetSkipWeekends:
+    """Tests for get_skip_weekends."""
+
+    def test_get_skip_weekends_default_true(self, tmp_path, monkeypatch):
+        """Default is True when not in config."""
+        config_file = tmp_path / "config.toml"
+        config_file.write_text('dailies_dir = "/test"')
+        monkeypatch.setattr("daily.config.CONFIG_FILE", config_file)
+        assert get_skip_weekends() is True
+
+    def test_get_skip_weekends_from_config_false(self, tmp_path, monkeypatch):
+        """Reads value from config file when false."""
+        config_file = tmp_path / "config.toml"
+        config_file.write_text("skip_weekends = false")
+        monkeypatch.setattr("daily.config.CONFIG_FILE", config_file)
+        assert get_skip_weekends() is False
+
+    def test_get_skip_weekends_from_config_true(self, tmp_path, monkeypatch):
+        """Reads value from config file when true."""
+        config_file = tmp_path / "config.toml"
+        config_file.write_text("skip_weekends = true")
+        monkeypatch.setattr("daily.config.CONFIG_FILE", config_file)
+        assert get_skip_weekends() is True
+
+    def test_get_skip_weekends_no_config_file(self, tmp_path, monkeypatch):
+        """Returns default True when no config file."""
+        monkeypatch.setattr("daily.config.CONFIG_FILE", tmp_path / "nonexistent.toml")
+        assert get_skip_weekends() is True
 
 
 class TestCreateDefaultConfig:
