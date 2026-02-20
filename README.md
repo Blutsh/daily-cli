@@ -7,6 +7,11 @@ Minimalist CLI for engineers to log daily work. Perfect for daily standups.
 
 ![Demo](assets/demo.gif)
 
+## Requirements
+
+- **Python 3.11 or higher**
+- `fzf` (optional, required only for `daily search` command)
+
 ## Features
 
 - **Fast capture**: Log work in under 10 seconds
@@ -18,13 +23,33 @@ Minimalist CLI for engineers to log daily work. Perfect for daily standups.
 
 ## Installation
 
-### Using pipx (recommended)
+### Using uv (recommended)
+
+```bash
+uv tool install daily-cli-tool
+```
+
+Or specify a Python version if you don't have Python 3.11+ as default:
+
+```bash
+uv tool install daily-cli-tool --python 3.11
+```
+
+*Note: Install `uv` from [here](https://docs.astral.sh/uv/getting-started/installation/) if you don't have it.*
+
+### Using pipx
 
 ```bash
 pipx install daily-cli-tool
 ```
 
-That's it! The `daily` command is now available globally.
+Or specify a Python version if needed:
+
+```bash
+pipx install daily-cli-tool --python python3.11
+```
+
+*Note: Install `pipx` from [here](https://pipx.pypa.io/latest/installation/) if you don't have it.*
 
 ### From source (for development)
 
@@ -40,11 +65,11 @@ pipx install .
 uv sync
 ```
 
-### Using uv (for development)
+### From source with uv (for development)
 
 ```bash
 # Clone the repository
-git clone https://github.com/user/daily-cli.git
+git clone https://github.com/creusvictor/daily-cli.git
 cd daily-cli
 
 # Install
@@ -57,13 +82,13 @@ uv run daily --help
 ### Using pip
 
 ```bash
-pip install daily-cli
+pip install daily-cli-tool
 ```
 
 ### From source
 
 ```bash
-git clone https://github.com/user/daily-cli.git
+git clone https://github.com/creusvictor/daily-cli.git
 cd daily-cli
 pip install -e .
 ```
