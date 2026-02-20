@@ -5,6 +5,8 @@ Minimalist CLI for engineers to log daily work. Perfect for daily standups.
 [![PyPI version](https://badge.fury.io/py/daily-cli-tool.svg)](https://pypi.org/project/daily-cli-tool/)
 [![Python versions](https://img.shields.io/pypi/pyversions/daily-cli-tool.svg)](https://pypi.org/project/daily-cli-tool/)
 
+![Demo](assets/demo.gif)
+
 ## Features
 
 - **Fast capture**: Log work in under 10 seconds
