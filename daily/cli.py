@@ -287,14 +287,11 @@ def search(
 
     if not daily_files:
         if tag_list:
-            console.print(
-                f"[yellow]No daily files found with tags: {', '.join(tag_list)}[/yellow]"
-            )
+            console.print(f"[yellow]No daily files found with tags: {', '.join(tag_list)}[/yellow]")
         else:
             console.print("[yellow]No daily files found.[/yellow]")
         raise typer.Exit(0)
 
-    # Prepare items for fzf (display string -> file path mapping)
     display_items = []
     file_mapping = {}
 
@@ -303,39 +300,36 @@ def search(
         display_items.append(display)
         file_mapping[display] = file_path
 
-    # Use fzf for interactive selection
     try:
         from iterfzf import iterfzf
 
-        # fzf will replace {} with the selected item, but we need the file path
-        # We'll use a workaround: pass --preview option directly with file path extraction
-        # Since display format is "YYYY-MM-DD (...) - X entries", we extract the date
-        # and construct the file path
+        # Embed full absolute path as field 1, display string as field 2
+        fzf_items = [
+            f"{file_path}\t{display}"
+            for (file_path, _), display in zip(daily_files, display_items)
+        ]
 
-        dailies_dir = str(daily_files[0][0].parent)  # Get dailies directory
-
-        # Preview command: extract date from line and cat the corresponding file
-        # Format: "2026-01-26 (Monday) - 3 entries" -> extract "2026-01-26"
-        preview_cmd = f"cat {dailies_dir}/{{1}}-daily.md 2>/dev/null || echo 'Preview not available'"
+        if sys.platform == "win32":
+            preview_cmd = "type {1}"
+        else:
+            preview_cmd = "cat {1}"
 
         selected = iterfzf(
-            display_items,
+            fzf_items,
             multi=False,
             preview=preview_cmd,
-            __extra__=["--preview-window=right:50%:wrap"],
+            __extra__=["--preview-window=right:50%:wrap", "--delimiter=\t", "--with-nth=2"],
             prompt="Select daily file > ",
             query="" if not tag_list else " ".join(tag_list),
             ansi=True,
         )
 
         if not selected:
-            # User cancelled (pressed ESC)
             raise typer.Exit(0)
 
-        # Get the file path from selection
-        selected_file = file_mapping[selected]
+        display_part = selected.split("\t", 1)[1]
+        selected_file = file_mapping[display_part]
 
-        # Open in $EDITOR
         editor = os.environ.get("EDITOR", "vim")
 
         try:
@@ -344,23 +338,16 @@ def search(
             console.print(f"[red]Failed to open {selected_file} with {editor}[/red]")
             raise typer.Exit(1)
         except FileNotFoundError:
-            console.print(
-                f"[red]Editor '{editor}' not found. Set $EDITOR environment variable.[/red]"
-            )
+            console.print(f"[red]Editor '{editor}' not found. Set $EDITOR environment variable.[/red]")
             raise typer.Exit(1)
 
     except ImportError:
-        console.print(
-            "[red]fzf integration requires 'iterfzf' package and 'fzf' binary.[/red]"
-        )
-        console.print(
-            "Install with: pip install iterfzf && brew install fzf  (or apt-get install fzf)"
-        )
+        console.print("[red]fzf integration requires 'iterfzf' package and 'fzf' binary.[/red]")
+        console.print("Install with: pip install iterfzf && brew install fzf  (or apt-get install fzf)")
         raise typer.Exit(1)
     except Exception as e:
         console.print(f"[red]Error during search: {e}[/red]")
         raise typer.Exit(1)
-
 
 if __name__ == "__main__":
     app()
