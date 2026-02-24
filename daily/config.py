@@ -97,4 +97,4 @@ def create_default_config() -> None:
 # You can use ~ for user's home directory
 dailies_dir = "{DEFAULT_DAILIES_DIR}"
 '''
-        CONFIG_FILE.write_text(default_config)
+        CONFIG_FILE.write_text(default_config, encoding="utf-8")
