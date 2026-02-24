@@ -82,7 +82,7 @@ def ensure_daily_file_exists(date: datetime | None = None) -> Path:
 
     if not file_path.exists():
         template = create_daily_template(date)
-        file_path.write_text(template)
+        file_path.write_text(template, encoding="utf-8")
 
     return file_path
 
@@ -104,7 +104,7 @@ def read_daily_file(date: datetime | None = None) -> str:
     if not file_path.exists():
         raise FileNotFoundError(f"No daily file exists for {file_path.name}")
 
-    return file_path.read_text()
+    return file_path.read_text(encoding="utf-8")
 
 
 def write_daily_file(content: str, date: datetime | None = None) -> Path:
@@ -118,7 +118,7 @@ def write_daily_file(content: str, date: datetime | None = None) -> Path:
         Path to the saved file.
     """
     file_path = get_daily_file_path(date)
-    file_path.write_text(content)
+    file_path.write_text(content, encoding="utf-8")
     return file_path
 
 
@@ -313,7 +313,7 @@ def list_daily_files(
 
             # If tags filter is specified, check if file contains any of the tags
             if filter_tags:
-                content = file_path.read_text()
+                content = file_path.read_text(encoding="utf-8")
                 # Check if ANY bullet in the file has at least one of the tags
                 has_matching_bullet = False
                 for section_title in SECTIONS.values():
@@ -347,7 +347,7 @@ def get_all_tags_from_file(file_path: Path) -> set[str]:
         Set of unique tags found in the file.
     """
     try:
-        content = file_path.read_text()
+        content = file_path.read_text(encoding="utf-8")
         all_tags = set()
 
         for section_title in SECTIONS.values():

@@ -15,6 +15,27 @@ from daily.core import (
     list_daily_files,
 )
 
+
+def _fix_windows_console_encoding() -> None:
+    """Fix console encoding on Windows to support UTF-8/emojis.
+
+    On Windows, the default console encoding is often cp1252 or similar,
+    which doesn't support emojis and Unicode characters. This function
+    reconfigures stdout and stderr to use UTF-8 encoding.
+
+    This is only applied on Windows systems and is safe to call on other platforms.
+    """
+    if sys.platform == "win32":
+        # Reconfigure stdout and stderr to use UTF-8 encoding
+        if sys.stdout is not None and hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8")
+        if sys.stderr is not None and hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(encoding="utf-8")
+
+
+# Fix encoding issues on Windows before creating Console
+_fix_windows_console_encoding()
+
 console = Console()
 
 app = typer.Typer(

@@ -50,3 +50,6 @@ dailies/
 
 # Internal docs (not for public repo)
 .python-version
+
+# Vagrant testing infrastructure
+vagrant-test/
