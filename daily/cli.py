@@ -12,7 +12,10 @@ from daily.core import (
     format_daily_file_for_display,
     generate_cheat_data,
     insert_bullet,
+    delete_bullet,
     list_daily_files,
+    get_bullets_from_section,
+
 )
 
 
@@ -79,19 +82,33 @@ def validate_text(text: str) -> str:
 
 @app.command()
 def did(
-    text: str = typer.Argument(..., help="Completed work description"),
+    text: str = typer.Argument(None, help="Completed work description"),
     tags: str = typer.Option(None, "--tags", "-t", help="Comma-separated tags"),
 ) -> None:
     """Log completed work (Yesterday section)."""
-    text = validate_text(text)
-    tag_list = parse_tags(tags)
 
-    insert_bullet("did", text, tags=tag_list)
+    if text:
+        text = validate_text("just to make it work")
+        tag_list = parse_tags(tags)
 
-    if tag_list:
-        typer.echo(f"✓ Added to Done: {text} #tags: {','.join(tag_list)}")
+        insert_bullet("did", text, tags=tag_list)
+
+        if tag_list:
+            typer.echo(f"✓ Added to Done: {text} #tags: {','.join(tag_list)}")
+        else:
+            typer.echo(f"✓ Added to Done: {text}")
     else:
-        typer.echo(f"✓ Added to Done: {text}")
+        planned_todos_today = get_bullets_from_section("plan")
+        for i, c in enumerate(planned_todos_today, 1):
+            typer.echo(f"  {i}. {c}")
+        idx = typer.prompt("Select", type=int)
+        text = planned_todos_today[idx - 1]
+
+        # switching from plan to did
+        delete_bullet("plan",text)
+        insert_bullet("did", text)
+
+
 
 
 @app.command()
@@ -348,6 +365,7 @@ def search(
     except Exception as e:
         console.print(f"[red]Error during search: {e}[/red]")
         raise typer.Exit(1)
+
 
 if __name__ == "__main__":
     app()

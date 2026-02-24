@@ -70,6 +70,36 @@ def find_next_section(content: str, after_line: int) -> int:
     return len(lines)
 
 
+
+
+def delete_at_section(content: str, section_title: str, bullet: str) -> str:
+    """Delete a bullet in a specific section.
+
+    Args:
+        content: Markdown file content.
+        section_title: Section title where to insert.
+        bullet: Bullet text to delete (without the "- " prefix).
+
+    Returns:
+        New content with the bullet deleted.
+
+    Raises:
+        ValueError: If the section doesn't exist in the content.
+    """
+
+    section_line = find_section(content, section_title)
+    if section_line == -1:
+        raise ValueError(f"Section '{section_title}' not found")
+
+    lines = content.split("\n")
+
+    lines.remove(f"- {bullet}")
+
+    return "\n".join(lines)
+
+
+    
+
 def insert_at_section(content: str, section_title: str, bullet: str) -> str:
     """Insert a bullet in a specific section.
 

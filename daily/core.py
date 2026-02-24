@@ -10,6 +10,7 @@ from daily.markdown import (
     filter_bullets_by_tags,
     format_bullet_with_tags,
     insert_at_section,
+    delete_at_section,
 )
 
 
@@ -120,6 +121,47 @@ def write_daily_file(content: str, date: datetime | None = None) -> Path:
     file_path = get_daily_file_path(date)
     file_path.write_text(content, encoding="utf-8")
     return file_path
+
+
+# Could be an idx rather than full str x)
+def delete_bullet(
+    section: str, text: str, tags: list[str] | None = None, date: datetime | None = None
+    ) -> Path:
+    """Delete a bullet in a section of the daily file
+
+    Args:
+        section: Section name ("did", "plan", "block", "meeting", "notes").
+        text: Bullet text.
+        tags: Optional list of tags.
+        date: Date for the file. If None, uses current date.
+
+    Returns:
+        Path to the modified file.
+
+    Raises:
+        ValueError: If the section is not valid.
+    """
+
+    if section not in SECTIONS:
+        valid_sections = ", ".join(SECTIONS.keys())
+        raise ValueError(f"Invalid section '{section}'. Use: {valid_sections}")
+
+    if date is None:
+        date = datetime.now()
+
+    # Ensure file exists
+    ensure_daily_file_exists(date)
+
+    # Read current content
+    content = read_daily_file(date)
+
+
+    section_title = SECTIONS[section]
+    new_content = delete_at_section(content,section_title, text)
+
+    return write_daily_file(new_content, date)
+
+
 
 
 def insert_bullet(
