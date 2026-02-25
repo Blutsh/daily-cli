@@ -88,7 +88,6 @@ def did(
     """Log completed work (Yesterday section)."""
 
     if text:
-        text = validate_text("just to make it work")
         tag_list = parse_tags(tags)
 
         insert_bullet("did", text, tags=tag_list)
